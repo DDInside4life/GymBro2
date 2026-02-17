@@ -1,0 +1,64 @@
+﻿<Window x:Class="GymBro.App.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:GymBro.App.Infrastructure"
+        Title="Вход в GYM" Height="600" Width="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,10,0,5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+        <Style TargetType="PasswordBox">
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="MinWidth" Value="80"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <StackPanel>
+            <!-- Логотип -->
+            <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
+                <TextBlock Text="🏋️‍♂️" FontSize="40" HorizontalAlignment="Center"/>
+                <TextBlock Text="GYM" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Text="Gain Your Muscles" FontSize="12" Foreground="Gray" HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Логин -->
+            <TextBlock Text="Логин"/>
+            <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <!-- Пароль -->
+            <TextBlock Text="Пароль"/>
+            <PasswordBox local:PasswordBoxHelper.BoundPassword="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <!-- Сообщение об ошибке -->
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,10,0,0"/>
+
+            <!-- Кнопки -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="Войти" Command="{Binding LoginCommand}" Background="#3498DB" Foreground="White" FontWeight="Bold"/>
+                <Button Content="Отмена" Command="{Binding CancelCommand}" Background="#95A5A6" Foreground="White"/>
+            </StackPanel>
+
+            <!-- Ссылка на регистрацию -->
+            <TextBlock HorizontalAlignment="Center" Margin="0,20,0,0">
+                <Run Text="Нет аккаунта?"/>
+                <Hyperlink Command="{Binding RegisterCommand}">
+                    <Run Text="Зарегистрироваться"/>
+                </Hyperlink>
+            </TextBlock>
+        </StackPanel>
+    </Grid>
+</Window>

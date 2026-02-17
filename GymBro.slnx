@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="GymBro.App/GymBro.App.csproj" />
+  <Project Path="GymBro.Business/GymBro.Business.csproj" />
+  <Project Path="GymBro.DAL/GymBro.DAL.csproj" />
+  <Project Path="GymBro.Domain/GymBro.Domain.csproj" />
+</Solution>
