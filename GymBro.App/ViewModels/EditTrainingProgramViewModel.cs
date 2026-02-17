@@ -109,7 +109,7 @@ namespace GymBro.App.ViewModels
                 _originalProgram.DurationWeeks = DurationWeeks;
                 _originalProgram.Difficulty = Difficulty;
                 _originalProgram.WorkoutsPerWeek = WorkoutsPerWeek;
-                // Обновление упражнений потребует дополнительной логики, пока оставим как есть
+                _originalProgram.Exercises = Exercises.ToList();
                 CloseRequested?.Invoke(this, _originalProgram);
             }
         }
@@ -128,6 +128,11 @@ namespace GymBro.App.ViewModels
             var selected = Views.SelectExerciseWindow.ShowDialog(Application.Current.MainWindow);
             if (selected != null)
             {
+                if (Exercises.Any(e => e.Id == selected.Id))
+                {
+                    return;
+                }
+
                 Exercises.Add(selected);
             }
         }

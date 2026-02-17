@@ -65,7 +65,32 @@ namespace GymBro.Business.Managers
         public void CreateTrainingProgram(TrainingProgram program)
         {
             program.CreatedDate = DateTime.Now;
+            var selectedExerciseIds = program.Exercises?
+               .Where(e => e != null && e.Id > 0)
+               .Select(e => e.Id)
+               .Distinct()
+               .ToList() ?? new List<int>();
+
+            // Привязку упражнений делаем отдельно, чтобы избежать проблем с отслеживанием
+            // сущностей из разных DbContext.
+            program.Exercises = null;
             _trainingProgramRepository.Create(program);
+            _unitOfWork.SaveChanges();
+            if (selectedExerciseIds.Count == 0)
+            {
+                return;
+            }
+
+            var exercisesToAttach = _unitOfWork.ExerciseRepository
+                .Find(e => selectedExerciseIds.Contains(e.Id))
+                .ToList();
+
+            foreach (var exercise in exercisesToAttach)
+            {
+                exercise.TrainingProgramId = program.Id;
+                _unitOfWork.ExerciseRepository.Update(exercise);
+            }
+
             _unitOfWork.SaveChanges();
         }
 
@@ -74,7 +99,58 @@ namespace GymBro.Business.Managers
         /// </summary>
         public void UpdateTrainingProgram(TrainingProgram program)
         {
-            _trainingProgramRepository.Update(program);
+            var existingProgram = _trainingProgramRepository.Get(program.Id, "Exercises");
+            if (existingProgram == null)
+            {
+                return;
+            }
+
+            existingProgram.Name = program.Name;
+            existingProgram.Description = program.Description;
+            existingProgram.ProgramType = program.ProgramType;
+            existingProgram.DurationWeeks = program.DurationWeeks;
+            existingProgram.Difficulty = program.Difficulty;
+            existingProgram.WorkoutsPerWeek = program.WorkoutsPerWeek;
+
+            var selectedExerciseIds = program.Exercises?
+                .Where(e => e != null && e.Id > 0)
+                .Select(e => e.Id)
+                .Distinct()
+                .ToHashSet() ?? new HashSet<int>();
+
+            var currentExerciseIds = existingProgram.Exercises?
+                .Select(e => e.Id)
+                .ToHashSet() ?? new HashSet<int>();
+
+            var exerciseIdsToRemove = currentExerciseIds.Except(selectedExerciseIds).ToList();
+            if (exerciseIdsToRemove.Count > 0)
+            {
+                var exercisesToRemove = _unitOfWork.ExerciseRepository
+                    .Find(e => exerciseIdsToRemove.Contains(e.Id))
+                    .ToList();
+
+                foreach (var exercise in exercisesToRemove)
+                {
+                    exercise.TrainingProgramId = null;
+                    _unitOfWork.ExerciseRepository.Update(exercise);
+                }
+            }
+
+            var exerciseIdsToAdd = selectedExerciseIds.Except(currentExerciseIds).ToList();
+            if (exerciseIdsToAdd.Count > 0)
+            {
+                var exercisesToAdd = _unitOfWork.ExerciseRepository
+                    .Find(e => exerciseIdsToAdd.Contains(e.Id))
+                    .ToList();
+
+                foreach (var exercise in exercisesToAdd)
+                {
+                    exercise.TrainingProgramId = existingProgram.Id;
+                    _unitOfWork.ExerciseRepository.Update(exercise);
+                }
+            }
+
+            _trainingProgramRepository.Update(existingProgram);
             _unitOfWork.SaveChanges();
         }
 

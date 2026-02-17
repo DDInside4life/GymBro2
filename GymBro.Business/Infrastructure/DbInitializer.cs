@@ -102,10 +102,83 @@ namespace GymBro.Business.Infrastructure
                     ImageUrl = "pullups.jpg",
                     VideoUrl = "pullups.mp4",
                     Equipment = new List<Equipment> { equipmentList[4] }
+                },
+                new Exercise
+                {
+                    Name = "Тяга штанги в наклоне",
+                    Description = "Упражнение для мышц спины",
+                    DefaultSets = 4,
+                    DefaultRepsMin = 8,
+                    DefaultRepsMax = 12,
+                    RestBetweenSets = TimeSpan.FromMinutes(2),
+                    TechniqueTips = "Спина прямая, лопатки сводить",
+                    CommonMistakes = "Округление спины, рывки",
+                    ImageUrl = "bentoverrow.jpg",
+                    VideoUrl = "bentoverrow.mp4",
+                    Equipment = new List<Equipment> { equipmentList[0] } // штанга
+                },
+                new Exercise
+                {
+                    Name = "Жим гантелей сидя",
+                    Description = "Упражнение для плеч",
+                    DefaultSets = 3,
+                    DefaultRepsMin = 10,
+                    DefaultRepsMax = 15,
+                    RestBetweenSets = TimeSpan.FromMinutes(1.5),
+                    TechniqueTips = "Локти не разводить слишком широко",
+                    CommonMistakes = "Сведение локтей вперед",
+                    ImageUrl = "dumbbellpress.jpg",
+                    VideoUrl = "dumbbellpress.mp4",
+                    Equipment = new List<Equipment> { equipmentList[1] } // гантели
+                },
+                new Exercise
+                {
+                    Name = "Выпады с гантелями",
+                    Description = "Упражнение для ног и ягодиц",
+                    DefaultSets = 3,
+                    DefaultRepsMin = 12,
+                    DefaultRepsMax = 15,
+                    RestBetweenSets = TimeSpan.FromMinutes(1.5),
+                    TechniqueTips = "Колено не выходит за носок",
+                    CommonMistakes = "Наклон корпуса вперед",
+                    ImageUrl = "lunges.jpg",
+                    VideoUrl = "lunges.mp4",
+                    Equipment = new List<Equipment> { equipmentList[1] }
+                },
+                new Exercise
+                {
+                    Name = "Планка",
+                    Description = "Упражнение для кора",
+                    DefaultSets = 3,
+                    DefaultRepsMin = 30,
+                    DefaultRepsMax = 60,
+                    RestBetweenSets = TimeSpan.FromSeconds(30),
+                    TechniqueTips = "Тело прямая линия, не прогибаться",
+                    CommonMistakes = "Поднятый таз",
+                    ImageUrl = "plank.jpg",
+                    VideoUrl = "plank.mp4",
+                    Equipment = new List<Equipment>()
+                },
+                new Exercise
+                {
+                    Name = "Сгибание рук со штангой",
+                    Description = "Упражнение для бицепса",
+                    DefaultSets = 3,
+                    DefaultRepsMin = 10,
+                    DefaultRepsMax = 12,
+                    RestBetweenSets = TimeSpan.FromMinutes(1),
+                    TechniqueTips = "Локти прижаты к корпусу",
+                    CommonMistakes = "Рывки, раскачивание",
+                    ImageUrl = "bicepscurl.jpg",
+                    VideoUrl = "bicepscurl.mp4",
+                    Equipment = new List<Equipment> { equipmentList[0] }
                 }
             };
             context.Exercises.AddRange(exercises);
             context.SaveChanges();
+
+            // Получаем все упражнения для дальнейшей привязки к программам
+            var allExercises = context.Exercises.ToList();
 
             // Добавляем пользователей (профили)
             var users = new[]
@@ -184,6 +257,27 @@ namespace GymBro.Business.Infrastructure
                 }
             };
             context.TrainingPrograms.AddRange(programs);
+            context.SaveChanges();
+
+            // Получаем созданные программы (предполагаем, что они уже сохранены)
+            var savedPrograms = context.TrainingPrograms.ToList();
+            // Для каждой программы добавим несколько упражнений
+            var programExercises = new Dictionary<string, List<string>>
+            {
+                ["Силовая программа для набора массы"] = new List<string> { "Жим штанги лёжа", "Приседания со штангой", "Тяга штанги в наклоне", "Жим гантелей сидя" },
+                ["Кардио для похудения"] = new List<string> { "Бег на беговой дорожке", "Планка", "Выпады с гантелями" },
+                ["Фулбоди для начинающих"] = new List<string> { "Подтягивания", "Приседания со штангой", "Жим гантелей сидя", "Планка" }
+            };
+
+            foreach (var program in savedPrograms)
+            {
+                if (programExercises.ContainsKey(program.Name))
+                {
+                    var exerciseNames = programExercises[program.Name];
+                    var exercisesToAdd = allExercises.Where(e => exerciseNames.Contains(e.Name)).ToList();
+                    program.Exercises = exercisesToAdd;
+                }
+            }
             context.SaveChanges();
 
             // Добавляем роли
