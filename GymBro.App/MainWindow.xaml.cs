@@ -55,7 +55,11 @@ namespace GymBro.App
                     MainContentFrame.Navigate(new Pages.EquipmentPage());
                     break;
                 case "Users":
-                    MainContentFrame.Navigate(new Pages.UsersPage());
+                    var usersPage = new Pages.UsersPage
+                    {
+                        DataContext = new UsersPageViewModel()
+                    };
+                    MainContentFrame.Navigate(usersPage);
                     break;
             }
         }

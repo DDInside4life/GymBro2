@@ -16,11 +16,15 @@ namespace GymBro.Business.Managers
 
         public User ValidateUser(string login, string password)
         {
+            // Сначала ищем пользователя по логину
             var user = _userRepository.Find(u => u.Login == login).FirstOrDefault();
             if (user == null)
                 return null;
 
-            // Используем полное имя для гарантии
+            // Явно загружаем пользователя с ролями (через Get с Include)
+            user = _userRepository.Get(user.Id, "Roles");
+
+            // Проверяем пароль
             bool valid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
             return valid ? user : null;
         }

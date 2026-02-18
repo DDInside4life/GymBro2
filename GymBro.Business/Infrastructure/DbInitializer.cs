@@ -25,7 +25,13 @@ namespace GymBro.Business.Infrastructure
                 new Equipment { Name = "Скамья", Description = "Регулируемая скамья" },
                 new Equipment { Name = "Беговая дорожка", Description = "Кардиотренажёр" },
                 new Equipment { Name = "Турник", Description = "Для подтягиваний" },
-                new Equipment { Name = "Брусья", Description = "Для отжиманий" }
+                new Equipment { Name = "Брусья", Description = "Для отжиманий" },
+                new Equipment { Name = "Эспандер", Description = "Резиновый эспандер для растяжки" },
+                new Equipment { Name = "Фитбол", Description = "Мяч для упражнений на баланс" },
+                new Equipment { Name = "Канаты", Description = "Тросы для кроссфита" },
+                new Equipment { Name = "Гиря", Description = "16 кг" },
+                new Equipment { Name = "Степ-платформа", Description = "Для аэробики" },
+                new Equipment { Name = "Боксёрский мешок", Description = "Для ударов" }
             };
             context.Equipment.AddRange(equipmentList);
             context.SaveChanges();
@@ -172,13 +178,108 @@ namespace GymBro.Business.Infrastructure
                     ImageUrl = "bicepscurl.jpg",
                     VideoUrl = "bicepscurl.mp4",
                     Equipment = new List<Equipment> { equipmentList[0] }
-                }
+                },
+                new Exercise
+{
+    Name = "Махи гирей",
+    Description = "Упражнение для ягодиц и спины",
+    DefaultSets = 4,
+    DefaultRepsMin = 15,
+    DefaultRepsMax = 20,
+    RestBetweenSets = TimeSpan.FromSeconds(45),
+    TechniqueTips = "Держите спину прямой, работайте бёдрами",
+    CommonMistakes = "Сгибание рук, округление спины",
+    ImageUrl = "kettlebell_swing.jpg",
+    VideoUrl = "kettlebell_swing.mp4",
+    Equipment = new List<Equipment> { equipmentList.First(e => e.Name == "Гиря") }
+},
+new Exercise
+{
+    Name = "Бёрпи",
+    Description = "Комплексное кардио-упражнение",
+    DefaultSets = 3,
+    DefaultRepsMin = 10,
+    DefaultRepsMax = 15,
+    RestBetweenSets = TimeSpan.FromSeconds(60),
+    TechniqueTips = "Не прогибайтесь в пояснице",
+    CommonMistakes = "Неполное отжимание",
+    ImageUrl = "burpee.jpg",
+    VideoUrl = "burpee.mp4",
+    Equipment = new List<Equipment>() // без оборудования
+},
+new Exercise
+{
+    Name = "Скручивания на пресс",
+    Description = "Изолированное упражнение для пресса",
+    DefaultSets = 3,
+    DefaultRepsMin = 20,
+    DefaultRepsMax = 30,
+    RestBetweenSets = TimeSpan.FromSeconds(30),
+    TechniqueTips = "Не тяните шею руками",
+    CommonMistakes = "Рывки",
+    ImageUrl = "crunches.jpg",
+    VideoUrl = "crunches.mp4",
+    Equipment = new List<Equipment>()
+},
+new Exercise
+{
+    Name = "Русский твист",
+    Description = "Упражнение для косых мышц живота",
+    DefaultSets = 3,
+    DefaultRepsMin = 12,
+    DefaultRepsMax = 20,
+    RestBetweenSets = TimeSpan.FromSeconds(45),
+    TechniqueTips = "Держите ноги на весу",
+    CommonMistakes = "Поворот корпусом без участия мышц",
+    ImageUrl = "russian_twist.jpg",
+    VideoUrl = "russian_twist.mp4",
+    Equipment = new List<Equipment> { equipmentList.First(e => e.Name == "Гантели") } // можно с гантелью
+},
+new Exercise
+{
+    Name = "Зашагивания на платформу",
+    Description = "Упражнение для ног",
+    DefaultSets = 3,
+    DefaultRepsMin = 12,
+    DefaultRepsMax = 15,
+    RestBetweenSets = TimeSpan.FromSeconds(60),
+    TechniqueTips = "Не отталкивайтесь ногой сзади",
+    CommonMistakes = "Скругление спины",
+    ImageUrl = "step_ups.jpg",
+    VideoUrl = "step_ups.mp4",
+    Equipment = new List<Equipment> { equipmentList.First(e => e.Name == "Степ-платформа") }
+},
+new Exercise
+{
+    Name = "Отжимания на брусьях",
+    Description = "Упражнение для трицепса и груди",
+    DefaultSets = 4,
+    DefaultRepsMin = 8,
+    DefaultRepsMax = 12,
+    RestBetweenSets = TimeSpan.FromMinutes(1.5),
+    TechniqueTips = "Опускайтесь до параллели",
+    CommonMistakes = "Разведение локтей",
+    ImageUrl = "dips.jpg",
+    VideoUrl = "dips.mp4",
+    Equipment = new List<Equipment> { equipmentList.First(e => e.Name == "Брусья") }
+},
+new Exercise
+{
+    Name = "Тяга эспандера к поясу",
+    Description = "Упражнение для спины",
+    DefaultSets = 3,
+    DefaultRepsMin = 12,
+    DefaultRepsMax = 15,
+    RestBetweenSets = TimeSpan.FromSeconds(45),
+    TechniqueTips = "Сводите лопатки",
+    CommonMistakes = "Рывки корпусом",
+    ImageUrl = "band_row.jpg",
+    VideoUrl = "band_row.mp4",
+    Equipment = new List<Equipment> { equipmentList.First(e => e.Name == "Эспандер") }
+}
             };
             context.Exercises.AddRange(exercises);
             context.SaveChanges();
-
-            // Получаем все упражнения для дальнейшей привязки к программам
-            var allExercises = context.Exercises.ToList();
 
             // Добавляем пользователей (профили)
             var users = new[]
@@ -219,66 +320,45 @@ namespace GymBro.Business.Infrastructure
 
             var userIds = users.Select(u => u.Id).ToArray();
 
-            // Добавляем тренировочные программы
-            var programs = new[]
-            {
-                new TrainingProgram
-                {
-                    Name = "Силовая программа для набора массы",
-                    Description = "Интенсивные тренировки с акцентом на базовые упражнения",
-                    ProgramType = "Силовая",
-                    DurationWeeks = 12,
-                    Difficulty = 4,
-                    WorkoutsPerWeek = 4,
-                    CreatedDate = DateTime.Now,
-                    UserProfileId = userIds[0]
-                },
-                new TrainingProgram
-                {
-                    Name = "Кардио для похудения",
-                    Description = "Высокоинтенсивные интервальные тренировки",
-                    ProgramType = "Кардио",
-                    DurationWeeks = 8,
-                    Difficulty = 3,
-                    WorkoutsPerWeek = 5,
-                    CreatedDate = DateTime.Now,
-                    UserProfileId = userIds[1]
-                },
-                new TrainingProgram
-                {
-                    Name = "Фулбоди для начинающих",
-                    Description = "Круговая тренировка на всё тело",
-                    ProgramType = "Фулбоди",
-                    DurationWeeks = 6,
-                    Difficulty = 2,
-                    WorkoutsPerWeek = 3,
-                    CreatedDate = DateTime.Now,
-                    UserProfileId = userIds[2]
-                }
-            };
-            context.TrainingPrograms.AddRange(programs);
-            context.SaveChanges();
-
-            // Получаем созданные программы (предполагаем, что они уже сохранены)
-            var savedPrograms = context.TrainingPrograms.ToList();
-            // Для каждой программы добавим несколько упражнений
-            var programExercises = new Dictionary<string, List<string>>
-            {
-                ["Силовая программа для набора массы"] = new List<string> { "Жим штанги лёжа", "Приседания со штангой", "Тяга штанги в наклоне", "Жим гантелей сидя" },
-                ["Кардио для похудения"] = new List<string> { "Бег на беговой дорожке", "Планка", "Выпады с гантелями" },
-                ["Фулбоди для начинающих"] = new List<string> { "Подтягивания", "Приседания со штангой", "Жим гантелей сидя", "Планка" }
-            };
-
-            foreach (var program in savedPrograms)
-            {
-                if (programExercises.ContainsKey(program.Name))
-                {
-                    var exerciseNames = programExercises[program.Name];
-                    var exercisesToAdd = allExercises.Where(e => exerciseNames.Contains(e.Name)).ToList();
-                    program.Exercises = exercisesToAdd;
-                }
-            }
-            context.SaveChanges();
+            //// Добавляем тренировочные программы
+            //var programs = new[]
+            //{
+            //    new TrainingProgram
+            //    {
+            //        Name = "Силовая программа для набора массы",
+            //        Description = "Интенсивные тренировки с акцентом на базовые упражнения",
+            //        ProgramType = "Силовая",
+            //        DurationWeeks = 12,
+            //        Difficulty = 4,
+            //        WorkoutsPerWeek = 4,
+            //        CreatedDate = DateTime.Now,
+            //        UserProfileId = userIds[0]
+            //    },
+            //    new TrainingProgram
+            //    {
+            //        Name = "Кардио для похудения",
+            //        Description = "Высокоинтенсивные интервальные тренировки",
+            //        ProgramType = "Кардио",
+            //        DurationWeeks = 8,
+            //        Difficulty = 3,
+            //        WorkoutsPerWeek = 5,
+            //        CreatedDate = DateTime.Now,
+            //        UserProfileId = userIds[1]
+            //    },
+            //    new TrainingProgram
+            //    {
+            //        Name = "Фулбоди для начинающих",
+            //        Description = "Круговая тренировка на всё тело",
+            //        ProgramType = "Фулбоди",
+            //        DurationWeeks = 6,
+            //        Difficulty = 2,
+            //        WorkoutsPerWeek = 3,
+            //        CreatedDate = DateTime.Now,
+            //        UserProfileId = userIds[2]
+            //    }
+            //};
+            //context.TrainingPrograms.AddRange(programs);
+            //context.SaveChanges();
 
             // Добавляем роли
             if (!context.Roles.Any())
@@ -356,9 +436,107 @@ namespace GymBro.Business.Infrastructure
                         CreatedDate = DateTime.Now,
                         IsTemplate = true,
                         UserProfileId = userIds[0]
-                    }
+                    },
+                //    new TrainingProgram
+                //{
+                //    Name = "Силовая программа для набора массы",
+                //    Description = "Интенсивные тренировки с акцентом на базовые упражнения",
+                //    ProgramType = "Силовая",
+                //    DurationWeeks = 12,
+                //    Difficulty = 4,
+                //    WorkoutsPerWeek = 4,
+                //    CreatedDate = DateTime.Now,
+                //    IsTemplate = true,
+                //    UserProfileId = userIds[0]
+                //},
+                //new TrainingProgram
+                //{
+                //    Name = "Кардио для похудения",
+                //    Description = "Высокоинтенсивные интервальные тренировки",
+                //    ProgramType = "Кардио",
+                //    DurationWeeks = 8,
+                //    Difficulty = 3,
+                //    WorkoutsPerWeek = 5,
+                //    CreatedDate = DateTime.Now,
+                //    IsTemplate = true,
+                //    UserProfileId = userIds[0]
+                //},
+                //new TrainingProgram
+                //{
+                //    Name = "Фулбоди для начинающих",
+                //    Description = "Круговая тренировка на всё тело",
+                //    ProgramType = "Фулбоди",
+                //    DurationWeeks = 6,
+                //    Difficulty = 2,
+                //    WorkoutsPerWeek = 3,
+                //    CreatedDate = DateTime.Now,
+                //    IsTemplate = true,
+                //    UserProfileId = userIds[0]
+                //},
+                new TrainingProgram
+                {
+                    Name = "Программа для ягодиц",
+                    Description = "Акцент на ягодичные мышцы",
+                    ProgramType = "Силовая",
+                    DurationWeeks = 8,
+                    Difficulty = 3,
+                    WorkoutsPerWeek = 3,
+                    CreatedDate = DateTime.Now,
+                    IsTemplate = true,
+                    UserProfileId = userIds[0] // привяжите к существующему профилю
+                },
+                //new TrainingProgram
+                //{
+                //    Name = "Круговая тренировка для всего тела",
+                //    Description = "Интенсивная круговая тренировка",
+                //    ProgramType = "Фулбоди",
+                //    DurationWeeks = 6,
+                //    Difficulty = 4,
+                //    WorkoutsPerWeek = 4,
+                //    CreatedDate = DateTime.Now,
+                //    IsTemplate = true,
+                //    UserProfileId = userIds[0]
+                //},
+                //new TrainingProgram
+                //{
+                //    Name = "Кардио для выносливости",
+                //    Description = "Тренировки на выносливость",
+                //    ProgramType = "Кардио",
+                //    DurationWeeks = 10,
+                //    Difficulty = 3,
+                //    WorkoutsPerWeek = 5,
+                //    CreatedDate = DateTime.Now,
+                //    IsTemplate = true,
+                //    UserProfileId = userIds[0]
+                //}
                 };
                 context.TrainingPrograms.AddRange(templates);
+                context.SaveChanges();
+
+                var allExercises = context.Exercises.ToList(); // все упражнения уже есть
+                var templatePrograms = context.TrainingPrograms.Where(p => p.IsTemplate).ToList();
+                var templateExercises = new Dictionary<string, List<string>>
+                {
+                    ["Силовая программа для начинающих"] = new List<string> { "Жим штанги лёжа", "Приседания со штангой", "Тяга штанги в наклоне", "Сгибание рук со штангой" },
+                    ["Кардио для похудения"] = new List<string> { "Бег на беговой дорожке", "Планка", "Выпады с гантелями" },
+                    ["Фулбоди для всех"] = new List<string> { "Подтягивания", "Жим гантелей сидя", "Планка", "Выпады с гантелями" },
+                    //["Силовая программа для набора массы"] = new List<string> { "Жим штанги лёжа", "Приседания со штангой", "Тяга штанги в наклоне", "Жим гантелей сидя" },
+                    //["Кардио для похудения"] = new List<string> { "Бег на беговой дорожке", "Планка", "Выпады с гантелями" },
+                    //["Фулбоди для начинающих"] = new List<string> { "Подтягивания", "Приседания со штангой", "Жим гантелей сидя", "Планка" },
+                    ["Программа для ягодиц"] = new List<string> { "Приседания со штангой", "Выпады с гантелями", "Махи гирей", "Зашагивания на платформу" },
+                    //["Круговая тренировка для всего тела"] = new List<string> { "Бёрпи", "Отжимания на брусьях", "Тяга эспандера к поясу", "Скручивания на пресс" },
+                    //["Кардио для выносливости"] = new List<string> { "Бег на беговой дорожке", "Бёрпи", "Планка", "Русский твист" }
+                };
+
+                foreach (var prog in templatePrograms)
+                {
+                    if (templateExercises.ContainsKey(prog.Name))
+                    {
+                        var exerciseNames = templateExercises[prog.Name];
+                        var exercisesToAdd = allExercises.Where(e => exerciseNames.Contains(e.Name)).ToList();
+                        prog.Exercises = exercisesToAdd;
+                    }
+                }
                 context.SaveChanges();
             }
         }

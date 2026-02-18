@@ -28,7 +28,7 @@ namespace GymBro.App.ViewModels
 
             Users = new ObservableCollection<User>();
 
-            LoadUsersAsync();
+            
 
             AddUserCommand = new RelayCommand(ExecuteAddUser, _ => _isAdmin);
             EditUserCommand = new RelayCommand(ExecuteEditUser, _ => _isAdmin && SelectedUser != null);
@@ -59,7 +59,7 @@ namespace GymBro.App.ViewModels
         public ICommand EditUserCommand { get; }
         public ICommand DeleteUserCommand { get; }
 
-        private async Task LoadUsersAsync()
+        public async Task LoadUsersAsync()
         {
             try
             {
