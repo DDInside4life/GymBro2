@@ -53,5 +53,19 @@ namespace GymBro.Business.Managers
             await Task.Run(() => _unitOfWork.SaveChanges());
         }
 
+        public async Task UpdateExerciseAsync(Exercise exercise)
+        {
+            _exerciseRepository.Update(exercise);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<bool> DeleteExerciseAsync(int id)
+        {
+            var result = _exerciseRepository.Delete(id);
+            if (result)
+                await _unitOfWork.SaveChangesAsync();
+            return result;
+        }
+
     }
 }

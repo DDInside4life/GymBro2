@@ -65,5 +65,10 @@ namespace GymBro.DAL.Repositories
         {
             _context?.Dispose();
         }
+
+        public Task SaveChangesAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

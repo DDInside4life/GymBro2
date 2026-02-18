@@ -23,6 +23,8 @@ namespace GymBro.App.ViewModels
         private readonly SemaphoreSlim _loadSemaphore = new SemaphoreSlim(1, 1);
 
         public ICommand AddExerciseCommand { get; }
+        public ICommand EditExerciseCommand { get; }
+        public ICommand DeleteExerciseCommand { get; }
 
         public ExercisesPageViewModel()
         {
@@ -32,7 +34,53 @@ namespace GymBro.App.ViewModels
             _isAdmin = SessionManager.IsInRole("Admin");
             Exercises = new ObservableCollection<Exercise>();
             LoadExercisesAsync();
+
             AddExerciseCommand = new RelayCommand(ExecuteAddExercise, _ => _isAdmin);
+            EditExerciseCommand = new RelayCommand(ExecuteEditExercise, CanEditOrDelete);
+            DeleteExerciseCommand = new RelayCommand(ExecuteDeleteExercise, CanEditOrDelete);
+        }
+
+        private bool CanEditOrDelete(object param) => _isAdmin && SelectedExercise != null;
+
+        private async void ExecuteEditExercise(object param)
+        {
+            if (SelectedExercise == null) return;
+            var allEquipment = (await _equipmentManager.GetAllEquipmentAsync()).ToList();
+            var dialog = new Views.EditExerciseWindow(SelectedExercise, allEquipment);
+            dialog.Owner = Application.Current.MainWindow;
+            if (dialog.ShowDialog() == true)
+            {
+                SelectedExercise.Name = dialog.ExerciseName;
+                SelectedExercise.Description = dialog.ExerciseDescription;
+                SelectedExercise.DefaultSets = dialog.DefaultSets;
+                SelectedExercise.DefaultRepsMin = dialog.RepsMin;
+                SelectedExercise.DefaultRepsMax = dialog.RepsMax;
+                SelectedExercise.RestBetweenSets = TimeSpan.FromSeconds(dialog.RestSeconds);
+                SelectedExercise.TechniqueTips = dialog.TechniqueTips;
+                SelectedExercise.CommonMistakes = dialog.CommonMistakes;
+                SelectedExercise.Equipment = dialog.SelectedEquipment;
+
+                await _exerciseManager.UpdateExerciseAsync(SelectedExercise);
+                await LoadExercisesAsync(); // обновить список
+            }
+        }
+
+        private async void ExecuteDeleteExercise(object param)
+        {
+            if (SelectedExercise == null) return;
+            var result = MessageBox.Show($"Удалить упражнение '{SelectedExercise.Name}'?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                if (await _exerciseManager.DeleteExerciseAsync(SelectedExercise.Id))
+                {
+                    Exercises.Remove(SelectedExercise);
+                    SelectedExercise = Exercises.FirstOrDefault();
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось удалить упражнение.");
+                }
+            }
         }
 
         private async void ExecuteAddExercise(object param)

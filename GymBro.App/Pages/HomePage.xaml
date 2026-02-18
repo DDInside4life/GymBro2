@@ -13,7 +13,7 @@
 
                 <!-- Приветствие и дата -->
                 <StackPanel Margin="0,0,0,30">
-                    <TextBlock Text="Добро пожаловать, Роман!"
+                    <TextBlock Text="{Binding CurrentUserFullName}"
                                FontSize="28"
                                FontWeight="SemiBold"
                                Foreground="#2C3E50"/>

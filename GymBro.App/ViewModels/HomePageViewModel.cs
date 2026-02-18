@@ -22,6 +22,7 @@ namespace GymBro.App.ViewModels
         private bool _isLoading;
         private readonly SemaphoreSlim _loadSemaphore = new SemaphoreSlim(1, 1);
 
+        public string CurrentUserFullName => $"Добро пожаловать, {SessionManager.CurrentUser?.FullName}!" ?? "Гость";
 
         public async Task RefreshDataAsync()
         {

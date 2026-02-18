@@ -17,5 +17,6 @@ namespace GymBro.Domain.Interfaces
         IRepository<Role> RolesRepository { get; }
         IRepository<Equipment> EquipmentRepository { get; }
         void SaveChanges();
+        Task SaveChangesAsync();
     }
 }

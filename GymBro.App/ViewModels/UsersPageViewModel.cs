@@ -79,17 +79,54 @@ namespace GymBro.App.ViewModels
             }
         }
 
-        private void ExecuteAddUser(object param)
+        private async void ExecuteAddUser(object param)
         {
-            // TODO: открыть окно добавления пользователя (можно использовать RegisterWindow, но с ролью)
-            MessageBox.Show("Добавление пользователя будет реализовано позже.");
+            var allRoles = (await _userManager.GetAllRolesAsync()).ToList();
+            var dialog = new Views.EditUserWindow(null, allRoles);
+            dialog.Owner = Application.Current.MainWindow;
+            if (dialog.ShowDialog() == true)
+            {
+                var newUser = new User
+                {
+                    Login = dialog.Login,
+                    FullName = dialog.FullName,
+                    Email = dialog.Email,
+                    Roles = new List<Role> { dialog.SelectedRole }
+                };
+                try
+                {
+                    await _userManager.CreateUserAsync(newUser, dialog.Password);
+                    await LoadUsersAsync(); // перезагрузить список
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка: {ex.Message}");
+                }
+            }
         }
 
-        private void ExecuteEditUser(object param)
+        private async void ExecuteEditUser(object param)
         {
             if (SelectedUser == null) return;
-            // TODO: редактирование пользователя (изменение роли, языка и т.д.)
-            MessageBox.Show("Редактирование пользователя будет реализовано позже.");
+            var allRoles = (await _userManager.GetAllRolesAsync()).ToList();
+            var dialog = new Views.EditUserWindow(SelectedUser, allRoles);
+            dialog.Owner = Application.Current.MainWindow;
+            if (dialog.ShowDialog() == true)
+            {
+                SelectedUser.Login = dialog.Login;
+                SelectedUser.FullName = dialog.FullName;
+                SelectedUser.Email = dialog.Email;
+                SelectedUser.Roles = new List<Role> { dialog.SelectedRole };
+                try
+                {
+                    await _userManager.UpdateUserAsync(SelectedUser, dialog.Password); // пароль может быть пустым
+                    await LoadUsersAsync();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка: {ex.Message}");
+                }
+            }
         }
 
         private async void ExecuteDeleteUser(object param)
@@ -103,8 +140,15 @@ namespace GymBro.App.ViewModels
             var result = MessageBox.Show($"Удалить пользователя '{SelectedUser.Login}'?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                // TODO: реализовать удаление пользователя (с каскадным удалением профиля?)
-                MessageBox.Show("Удаление временно отключено.");
+                if (await _userManager.DeleteUserAsync(SelectedUser.Id))
+                {
+                    Users.Remove(SelectedUser);
+                    SelectedUser = Users.FirstOrDefault();
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось удалить пользователя.");
+                }
             }
         }
     }

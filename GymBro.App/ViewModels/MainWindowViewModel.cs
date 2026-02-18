@@ -16,7 +16,7 @@ namespace GymBro.App.ViewModels
         private ICommand _navigateCommand;
         public ICommand NavigateCommand => _navigateCommand ??= new RelayCommand(ExecuteNavigate);
 
-        public string CurrentUserName => SessionManager.CurrentUser?.FullName ?? "Гость";
+        public string CurrentUserName => SessionManager.CurrentUser?.Login ?? "Гость";
         public bool IsAdmin => SessionManager.IsInRole("Admin");
         
         private void ExecuteNavigate(object parameter)

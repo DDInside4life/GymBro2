@@ -1,7 +1,7 @@
 ﻿<Window x:Class="GymBro.App.Views.EditEquipmentWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Оборудование" Height="250" Width="400"
+        Title="Оборудование" Height="300" Width="400"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <Grid Margin="20">
         <Grid.RowDefinitions>

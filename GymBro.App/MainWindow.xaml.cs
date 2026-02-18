@@ -63,10 +63,5 @@ namespace GymBro.App
                     break;
             }
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

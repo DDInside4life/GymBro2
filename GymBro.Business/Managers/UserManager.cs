@@ -84,5 +84,50 @@ namespace GymBro.Business.Managers
         {
             return await _userRepository.FindAsync(u => true);
         }
+
+        public async Task<IEnumerable<Role>> GetAllRolesAsync()
+        {
+            return await _unitOfWork.RolesRepository.FindAsync(r => true);
+        }
+
+        public async Task<User> GetUserByIdAsync(int id)
+        {
+            return await _unitOfWork.UsersRepository.FindAsync(u => u.Id == id).ContinueWith(t => t.Result.FirstOrDefault());
+        }
+
+        public async Task CreateUserAsync(User user, string password)
+        {
+            if (_userRepository.Find(u => u.Login == user.Login).Any())
+                throw new InvalidOperationException("Логин уже занят");
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
+            user.Language = "ru";
+            _userRepository.Create(user);
+            await _unitOfWork.SaveChangesAsync(); // если есть асинхронный SaveChanges, иначе синхронный
+        }
+
+        public async Task UpdateUserAsync(User user, string newPassword = null)
+        {
+            var existing = await _userRepository.FindAsync(u => u.Id == user.Id).ContinueWith(t => t.Result.FirstOrDefault());
+            if (existing == null) return;
+
+            existing.Login = user.Login;
+            existing.FullName = user.FullName;
+            existing.Email = user.Email;
+            existing.Roles = user.Roles;
+            if (!string.IsNullOrWhiteSpace(newPassword))
+                existing.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+            _userRepository.Update(existing);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<bool> DeleteUserAsync(int id)
+        {
+            var result = _userRepository.Delete(id);
+            if (result)
+                await _unitOfWork.SaveChangesAsync();
+            return result;
+        }
     }
 }
