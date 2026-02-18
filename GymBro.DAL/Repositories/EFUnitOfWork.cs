@@ -3,6 +3,7 @@ using GymBro.Domain.Entities;
 using GymBro.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Threading.Tasks;
 
 namespace GymBro.DAL.Repositories
 {
@@ -68,7 +69,7 @@ namespace GymBro.DAL.Repositories
 
         public Task SaveChangesAsync()
         {
-            throw new NotImplementedException();
+            return _context.SaveChangesAsync();
         }
     }
 }

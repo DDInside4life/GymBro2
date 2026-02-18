@@ -2,6 +2,7 @@
 using GymBro.Domain.Entities;
 using GymBro.Domain.Interfaces;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace GymBro.Business.Managers
 {
@@ -122,12 +123,25 @@ namespace GymBro.Business.Managers
             await _unitOfWork.SaveChangesAsync();
         }
 
+
+
         public async Task<bool> DeleteUserAsync(int id)
         {
-            var result = _userRepository.Delete(id);
-            if (result)
-                await _unitOfWork.SaveChangesAsync();
-            return result;
+            var user = _userRepository.Get(id, "UserProfile", "Roles");
+            if (user == null)
+                return false;
+
+            if (user.UserProfileId.HasValue)
+            {
+                _unitOfWork.UserProfilesRepository.Delete(user.UserProfileId.Value);
+            }
+
+            var deleted = _userRepository.Delete(id);
+            if (!deleted)
+                return false;
+
+            await _unitOfWork.SaveChangesAsync();
+            return true;
         }
     }
 }

@@ -28,7 +28,7 @@ namespace GymBro.App.ViewModels
 
             Users = new ObservableCollection<User>();
 
-            
+
 
             AddUserCommand = new RelayCommand(ExecuteAddUser, _ => _isAdmin);
             EditUserCommand = new RelayCommand(ExecuteEditUser, _ => _isAdmin && SelectedUser != null);
@@ -131,23 +131,48 @@ namespace GymBro.App.ViewModels
 
         private async void ExecuteDeleteUser(object param)
         {
-            if (SelectedUser == null) return;
-            if (SelectedUser.Id == SessionManager.CurrentUser?.Id)
+            var userToDelete = SelectedUser;
+            if (userToDelete == null) return;
+
+            if (userToDelete.Id == SessionManager.CurrentUser?.Id)
             {
                 MessageBox.Show("Нельзя удалить самого себя.");
                 return;
             }
-            var result = MessageBox.Show($"Удалить пользователя '{SelectedUser.Login}'?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
+            var login = string.IsNullOrWhiteSpace(userToDelete.Login) ? $"ID={userToDelete.Id}" : userToDelete.Login;
+            var result = MessageBox.Show($"Удалить пользователя '{login}'?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+
+            try
             {
-                if (await _userManager.DeleteUserAsync(SelectedUser.Id))
+                IsLoading = true;
+                var deleted = await _userManager.DeleteUserAsync(userToDelete.Id);
+                if (!deleted)
                 {
-                    Users.Remove(SelectedUser);
-                    SelectedUser = Users.FirstOrDefault();
+                    MessageBox.Show("Пользователь не найден или уже удалён.");
+                    return;
                 }
-                else
+
+                await LoadUsersAsync();
+                SelectedUser = null;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка удаления пользователя: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
                 {
-                    MessageBox.Show("Не удалось удалить пользователя.");
+                    if (await _userManager.DeleteUserAsync(SelectedUser.Id))
+                    {
+                        Users.Remove(SelectedUser);
+                        SelectedUser = Users.FirstOrDefault();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Не удалось удалить пользователя.");
+                    }
                 }
             }
         }
